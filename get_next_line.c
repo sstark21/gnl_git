@@ -5,83 +5,119 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: sstark <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/01/14 15:24:01 by sstark            #+#    #+#             */
-/*   Updated: 2019/01/27 15:13:49 by sstark           ###   ########.fr       */
+/*   Created: 2019/02/01 14:28:14 by sstark            #+#    #+#             */
+/*   Updated: 2019/02/06 23:10:39 by sstark           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
 #include <stdio.h>
-#include <stdlib.h>
+#include "get_next_line.h"
 
-int	ft_chek(char *buf)
+int		ft_chek(char *buf)
 {
-	int i;
+	int				i;
 
 	i = 1;
 	if (buf)
 	{
-		while (buf[i -1] != '\n' && buf[i - 1]) {
+		while (buf[i - 1] != '\n' && buf[i - 1])
 			i++;
-		}
 		return (buf[i - 1] == '\n' ? i : 0);
 	}
 	return (0);
 }
 
-//t_list	*ft_search(const int fd)
-//{
-//
-//}
-
-
-int	get_next_line(const int fd, char **line)
+t_list	*ft_lstsearch(int fd, t_list **lst)
 {
-	static char	*s;
-	static int	fd1;
-	int			rez;
-	char		*buf;
-	char		*tmp;
-	int			j;
+	char			*buf;
+	int				x;
+	t_list			*lst1;
+
+	lst1 = *lst;
+	if (lst1 == NULL && fd >= 0)
+	{
+		if (!(buf = ft_strnew(BUFF_SIZE)))
+			return (NULL);
+		x = read(fd, buf, BUFF_SIZE);
+		return (*lst = ft_lstnew(buf, fd));
+	}
+	else
+	{
+		while (lst1 != NULL)
+		{
+			if ((size_t)fd == lst1->content_size)
+				return (lst1);
+			if (lst1->next == NULL)
+			{
+				if (!(buf = ft_strnew(BUFF_SIZE)))
+					return (NULL);
+				if ((x = read(fd, buf, BUFF_SIZE)) != -1)
+					return (lst1->next = ft_lstnew(buf, fd));
+			}
+			lst1 = lst1->next;
+		}
+	}
+	return (NULL);
+}
+
+int		get_next_line(const int fd, char **line)
+{
+	int				rez;
+	char			*tmp;
+	static t_list	*f;
+	char			*buf;
+	t_list			*lst;
 
 	if (fd < 0 || line == NULL)
 		return (-1);
-	if (!s || fd != fd1)
-	{
-		fd1 = fd;
-		s = ft_strnew(BUFF_SIZE);
-		rez = read(fd, s, BUFF_SIZE);
-		buf = ft_strdup(s);
+	rez = BUFF_SIZE;
+	if (!(lst = ft_lstsearch(fd, &f)))
+		return (-1);
+	if (!(buf = ft_strnew(BUFF_SIZE)))
+		return (-1);
+	if (lst->content == NULL)
+	{	*line = NULL;
+		return (0);
 	}
-	else
-		buf = ft_strnew(BUFF_SIZE);
-	while ((rez) > 0 && !(j = ft_chek(buf)))
+	while ((rez) == BUFF_SIZE && !(ft_chek(lst->content)))
 	{
-		if (j > 0)
-		{
-			s = ft_strnew(BUFF_SIZE);
-			s = ft_strjoin(s, ft_strsub(buf, 0, j));
-			buf[j] = '\0';
-		}
-		rez = read(fd, buf, BUFF_SIZE);
-		tmp = ft_strjoin(s, buf);
-		free(s);
-		s = tmp;
+		rez = read(lst->content_size, buf, BUFF_SIZE);
+		if (rez < BUFF_SIZE)
+			buf[rez] = '\0';
+		//printf("buf :%s rez :%d ", buf, rez);
+		tmp = lst->content;
+		if (!(lst->content = ft_strjoin(lst->content, buf)))
+			return (-1);
+		free(tmp);
 	}
 	free(buf);
-	if (j == 0 && rez == 0)
+	if (rez == -1)
+		return (-1);
+	if (ft_chek(lst->content) == 0 || rez == 0)
 	{
-		*line = s;
-		s = ft_strnew(0);
-		return (1);
+		//printf("rez - %d", rez);
+		*line = lst->content;
+		lst->content = NULL;
+		return (ft_strlen(*line) == 0 ? 0 : 1);
 	}
 	else
 	{
-		j = ft_chek(s);
-		*line = ft_strsub(s, 0, j - 1);
-		tmp = s;
-		s = ft_strdup(s + j);
-		free (tmp);
+		if (!(*line = ft_strsub(lst->content, 0, ft_chek(lst->content) - 1)))
+			return (-1);
+		tmp = lst->content;
+//		if (!(lst->content = ft_strsub(tmp, ft_chek(lst->content),
+//				ft_strlen(&(tmp[ft_chek(lst->content)])))))
+//			return (-1);
+		if (ft_strlen(&(tmp[ft_chek(lst->content)])) > 0)
+		{
+			//printf("i - %zu\n", ft_strlen(&(tmp[ft_chek(lst->content)])));
+			if (!(lst->content = ft_strsub(tmp, ft_chek(lst->content),
+										   ft_strlen(&(tmp[ft_chek(lst->content)])))))
+				return (-1);
+		}
+		else
+			lst->content = ft_strnew(0);
+		free(tmp);
+		return (1);
 	}
-	return (0);
 }
