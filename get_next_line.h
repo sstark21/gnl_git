@@ -6,12 +6,12 @@
 /*   By: sstark <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/01 14:28:22 by sstark            #+#    #+#             */
-/*   Updated: 2019/02/06 22:48:47 by sstark           ###   ########.fr       */
+/*   Updated: 2019/02/09 12:49:27 by sstark           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef	GET_NEXT_LINE_LIST
-# define GET_NEXT_LINE_LIST
+#ifndef GET_NEXT_LINE_H
+# define GET_NEXT_LINE_H
 
 # include <stdlib.h>
 # include <unistd.h>
