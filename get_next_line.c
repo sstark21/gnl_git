@@ -6,7 +6,7 @@
 /*   By: sstark <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/01 14:28:14 by sstark            #+#    #+#             */
-/*   Updated: 2019/02/09 12:51:25 by sstark           ###   ########.fr       */
+/*   Updated: 2019/02/12 17:26:40 by sstark           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,19 @@ t_list	*ft_lstsearch(int fd, t_list **lst)
 	while (lst1 != NULL)
 	{
 		if ((size_t)fd == lst1->content_size)
-			return (lst1);
+		{
+			if (lst1->content == NULL)
+			{
+				if (!(buf = ft_strnew(BUFF_SIZE)))
+					return (NULL);
+				else if ((read(fd, buf, BUFF_SIZE)) > 0)
+					return (lst1->next = ft_lstnew(buf, fd));
+				else
+					ft_del_from(lst, lst1, NULL);
+			}
+			else
+				return (lst1);
+		}
 		if (lst1->next == NULL)
 		{
 			if (!(buf = ft_strnew(BUFF_SIZE)))
@@ -109,8 +121,6 @@ int		get_next_line(const int fd, char **line)
 		return (-1);
 	if (chek_mistake(fd, line, &f, &lst) != 1)
 		return (chek_mistake(fd, line, &f, &lst));
-	if (lst->content == NULL)
-		ft_del_from(&f, lst, NULL);
 	while ((rez) == BUFF_SIZE && !(ft_chek(lst->content)))
 	{
 		rez = read(lst->content_size, buf, BUFF_SIZE);
