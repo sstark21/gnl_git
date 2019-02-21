@@ -6,7 +6,7 @@
 /*   By: sstark <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/01 14:28:14 by sstark            #+#    #+#             */
-/*   Updated: 2019/02/13 18:21:55 by sstark           ###   ########.fr       */
+/*   Updated: 2019/02/21 18:33:06 by sstark           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ t_list	*ft_reader(int fd)
 
 	if (!(buf = ft_strnew(BUFF_SIZE)))
 		return (NULL);
-	if ((read(fd, buf, BUFF_SIZE)) > 0)
+	if ((read(fd, buf, BUFF_SIZE)) >= 0)
 		return (ft_lstnew(buf, fd));
 	free(buf);
 	return (NULL);
@@ -59,7 +59,7 @@ int		get_next_line_part2(int rez, t_list *lst, char **line)
 
 	if (rez == -1)
 		return (-1);
-	if (ft_strchr(lst->content, '\n') == NULL || rez == 0)
+	if (ft_strchr(lst->content, '\n') == NULL && rez < BUFF_SIZE)
 	{
 		*line = lst->content;
 		lst->content = NULL;
@@ -73,7 +73,7 @@ int		get_next_line_part2(int rez, t_list *lst, char **line)
 	{
 		if (!(lst->content = ft_strsub(tmp, ft_strchr(lst->content, '\n') -
 		(char *)lst->content + 1, ft_strlen(ft_strchr(lst->content, '\n')
-		- 1))))
+		+ 1))))
 			return (-1);
 	}
 	else
